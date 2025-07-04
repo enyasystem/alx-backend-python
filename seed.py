@@ -15,7 +15,8 @@ def connect_db():
             host='127.0.0.1',      # The server address (localhost means your own computer)
             user='root',           # Your MySQL username
             password='',    # Your MySQL password
-            port=3307  # The port number MySQL is running on (default is usually 3306, but here it's set to 3307 for this example)
+            port=3307,  # The port number MySQL is running on (default is usually 3306, but here it's set to 3307 for this example)
+            database='ALX_prodev'  # Optional: specify a database to connect to
         )
         # If connection is successful, return the connection object
         return connection
@@ -32,3 +33,11 @@ if __name__ == "__main__":
         conn.close()  # Always close the connection when done
     else:
         print("Connection failed.")
+        
+def create_database(connection):
+    """
+    Creates the ALX_prodev database if it does not exist.
+    """
+    cursor = connection.cursor()  # Get a cursor to execute SQL
+    cursor.execute("CREATE DATABASE IF NOT EXISTS ALX_prodev;")  # SQL to create DB
+    cursor.close()  # Always close the cursor
