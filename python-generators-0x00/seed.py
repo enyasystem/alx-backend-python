@@ -47,8 +47,8 @@ def connect_db():
         connection = mysql.connector.connect(
             host='127.0.0.1',      # The server address (localhost means your own computer)
             user='root',           # Your MySQL username
-            password='',    # Your MySQL password
-            port=3307,  # The port number MySQL is running on (default is usually 3306, but here it's set to 3307 for this example)
+            password='225Enya_system',    # Your MySQL password
+            port=3308,  # The port number MySQL is running on (default is usually 3306, but here it's set to 3308 for this example)
             database='ALX_prodev'  # Optional: specify a database to connect to
         )
         # If connection is successful, return the connection object

@@ -7,8 +7,8 @@ def stream_user_ages():
     conn = mysql.connector.connect(
         host='127.0.0.1',
         user='root',
-        password='',
-        port=3307,
+        password='225Enya_system',
+        port=3308,
         database='ALX_prodev'
     )
     cursor = conn.cursor()

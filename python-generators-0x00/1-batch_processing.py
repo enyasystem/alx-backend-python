@@ -8,8 +8,8 @@ def stream_users_in_batches(batch_size):
     conn = mysql.connector.connect(
         host='127.0.0.1',      # Database server address
         user='root',           # MySQL username
-        password='',           # MySQL password (empty if none)
-        port=3307,             # MySQL port (change if your server uses a different port)
+        password='225Enya_system',           # MySQL password (empty if none)
+        port=3308,             # MySQL port (change if your server uses a different port)
         database='ALX_prodev'  # Database name
     )
     # Create a cursor that returns each row as a dictionary
