@@ -6,6 +6,7 @@ This module provides helper functions for accessing nested dictionaries and othe
 """
 
 from typing import Any, Dict, Tuple
+from functools import wraps
 
 import requests
 
@@ -982,3 +983,15 @@ def access_nested_map(nested_map: Dict[str, Any], path: Tuple[str, ...]) -> Any:
             raise KeyError(key)
         nested_map = nested_map[key]
     return nested_map
+
+def memoize(fn):
+    """Decorator to memoize a method."""
+    attr_name = "_{}".format(fn.__name__)
+
+    @wraps(fn)
+    def memoized(self):
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, fn(self))
+        return getattr(self, attr_name)
+
+    return property(memoized)
