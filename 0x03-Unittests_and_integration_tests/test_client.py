@@ -77,12 +77,12 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Set up class by patching requests.get to return fixture payloads."""
+        """Patch requests.get to return fixture payloads."""
         cls.get_patcher = patch('requests.get')
         mock_get = cls.get_patcher.start()
 
         def side_effect(url):
-            if url == f"https://api.github.com/orgs/google":
+            if url == "https://api.github.com/orgs/google":
                 mock = unittest.mock.Mock()
                 mock.json.return_value = cls.org_payload
                 return mock
