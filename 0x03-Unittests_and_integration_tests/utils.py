@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+utils.py - Utility functions for nested map access and more.
+
+This module provides helper functions for accessing nested dictionaries and other utilities for integration and unit testing.
+"""
+
+from typing import Any, Dict, Tuple
 
 TEST_PAYLOAD = [
   (
@@ -949,8 +956,20 @@ TEST_PAYLOAD = [
   )
 ]
 
-def access_nested_map(nested_map, path):
-    """Access a value in a nested map using a tuple of keys."""
+def access_nested_map(nested_map: Dict[str, Any], path: Tuple[str, ...]) -> Any:
+    """
+    Access a value in a nested map using a tuple of keys.
+
+    Args:
+        nested_map: The dictionary to traverse.
+        path: A tuple of keys representing the path to the value.
+
+    Returns:
+        The value found at the end of the path.
+
+    Raises:
+        KeyError: If a key in the path does not exist or if a non-dict is accessed.
+    """
     for key in path:
         if not isinstance(nested_map, dict):
             raise KeyError(key)

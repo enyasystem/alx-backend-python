@@ -4,9 +4,6 @@ Unit tests for utils.access_nested_map
 """
 import unittest
 from parameterized import parameterized
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from utils import access_nested_map
 
 class TestAccessNestedMap(unittest.TestCase):
