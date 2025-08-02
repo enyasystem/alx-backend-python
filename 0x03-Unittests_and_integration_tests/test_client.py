@@ -11,7 +11,7 @@ from parameterized import parameterized_class
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test cases for GithubOrgClient.org property."""
+    """Test cases for GithubOrgClient methods and properties."""
 
     @parameterized.expand([
         ("google",),
