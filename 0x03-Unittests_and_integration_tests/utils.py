@@ -985,11 +985,23 @@ def access_nested_map(nested_map: Dict[str, Any], path: Tuple[str, ...]) -> Any:
     return nested_map
 
 def memoize(fn):
-    """Decorator to memoize a method."""
+    """
+    Decorator to memoize a method.
+
+    Args:
+        fn: The function to be memoized.
+
+    Returns:
+        property: A property that caches the result of the function.
+    """
     attr_name = "_{}".format(fn.__name__)
 
     @wraps(fn)
     def memoized(self):
+        """
+        Wrapper function for memoization.
+        Caches the result of the method after the first call.
+        """
         if not hasattr(self, attr_name):
             setattr(self, attr_name, fn(self))
         return getattr(self, attr_name)
