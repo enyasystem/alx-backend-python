@@ -7,6 +7,13 @@ This module provides helper functions for accessing nested dictionaries and othe
 
 from typing import Any, Dict, Tuple
 
+import requests
+
+def get_json(url: str) -> dict:
+    """Get JSON from remote URL."""
+    response = requests.get(url)
+    return response.json()
+
 TEST_PAYLOAD = [
   (
     {"repos_url": "https://api.github.com/orgs/google/repos"},
