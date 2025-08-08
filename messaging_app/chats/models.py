@@ -4,8 +4,13 @@ from django.contrib.auth.models import AbstractUser
 
 
 # Custom User Model
+
+# Extending AbstractUser to explicitly include password, first_name, and last_name fields
 class User(AbstractUser):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    password = models.CharField(max_length=128)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     role = models.CharField(
         max_length=10,
