@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+
+# VSCode
+.vscode/
+
+# Environments
+.env
+.venv/
+venv/
+ENV/
+
+# Docker
+*.pid
+db_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Ignore local settings
+local_settings.py
