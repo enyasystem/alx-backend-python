@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Apply blue deployment (existing live version)
+kubectl apply -f blue_deployment.yaml
+kubectl rollout status deployment/messaging-app-blue --timeout=120s
+
+# Ensure service points to blue initially
+kubectl apply -f kubeservice.yaml
+
+# Deploy green (new version)
+kubectl apply -f green_deployment.yaml
+kubectl rollout status deployment/messaging-app-green --timeout=120s
+
+# Check logs of green pods for errors
+GREEN_PODS=$(kubectl get pods -l app=messaging-app,version=green -o name)
+if [ -z "$GREEN_PODS" ]; then
+  echo "No green pods found"
+  exit 1
+fi
+
+for p in $GREEN_PODS; do
+  echo "==== Logs for $p ===="
+  kubectl logs $p --tail=200 || true
+done
+
+# If logs look good, switch service selector to green
+echo "Switching service selector to green"
+kubectl patch service messaging-app-service -p '{"spec":{"selector":{"app":"messaging-app","version":"green"}}}'
+
+kubectl get svc messaging-app-service -o yaml
+kubectl get pods -l app=messaging-app -o wide
