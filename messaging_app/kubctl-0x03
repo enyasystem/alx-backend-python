@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Apply the updated blue deployment to trigger a rolling update
+kubectl apply -f blue_deployment.yaml
+
+# Monitor rollout status
+kubectl rollout status deployment/messaging-app-blue --watch
+
+# Continuously curl the service endpoint to check for downtime
+SERVICE_IP=127.0.0.1
+SERVICE_PORT=8000
+
+echo "Starting uptime test against http://$SERVICE_IP:$SERVICE_PORT/"
+for i in {1..60}; do
+  if curl -sS -o /dev/null -w "%{http_code}" http://$SERVICE_IP:$SERVICE_PORT/; then
+    echo "[$(date +%T)] request OK"
+  else
+    echo "[$(date +%T)] request FAILED"
+  fi
+  sleep 1
+done
+
+# Check current pods
+kubectl get pods -l app=messaging-app -o wide
