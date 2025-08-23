@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.10'
-        }
-    }
+    agent any
     environment {
         DJANGO_SETTINGS_MODULE = 'messaging_app.settings'
     }
