@@ -8,11 +8,9 @@ pipeline {
         }
         stage('Install Dependencies & Run Tests') {
             steps {
-                withPythonEnv('python3') {
-                    sh 'pip install --upgrade pip'
-                    sh 'pip install -r messaging_app/requirements.txt'
-                    sh 'pytest messaging_app --junitxml=report.xml'
-                }
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r messaging_app/requirements.txt'
+                sh 'pytest messaging_app --junitxml=report.xml'
             }
         }
     }
