@@ -1,6 +1,7 @@
 pipeline {
     agent any
     environment {
+        VENV = 'venv'
         DJANGO_SETTINGS_MODULE = 'messaging_app.settings'
     }
     stages {
@@ -11,18 +12,28 @@ pipeline {
         }
         stage('Install dependencies') {
             steps {
-                sh 'pip install --upgrade pip'
-                sh 'pip install -r messaging_app/requirements.txt'
+                sh '''
+                    python3 -m venv $VENV
+                    . $VENV/bin/activate
+                    pip install --upgrade pip
+                    pip install -r messaging_app/requirements.txt
+                '''
             }
         }
         stage('Migrate Database') {
             steps {
-                sh 'python3 messaging_app/manage.py migrate'
+                sh '''
+                    . $VENV/bin/activate
+                    python messaging_app/manage.py migrate
+                '''
             }
         }
         stage('Run tests') {
             steps {
-                sh 'pytest messaging_app --ds=messaging_app.settings --junitxml=report.xml'
+                sh '''
+                    . $VENV/bin/activate
+                    pytest messaging_app --ds=messaging_app.settings --junitxml=report.xml
+                '''
             }
         }
     }
