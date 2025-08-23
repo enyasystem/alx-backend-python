@@ -1,3 +1,37 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3.10'
+        }
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git credentialsId: 'github-creds', url: 'https://github.com/enyasystem/alx-backend-python.git', branch: 'main'
+            }
+        }
+        stage('Install Dependencies & Run Tests') {
+            steps {
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r messaging_app/requirements.txt'
+                sh 'pytest messaging_app --junitxml=report.xml'
+            }
+        }
+    }
+    post {
+        success {
+            echo '✅ Pipeline succeeded!'
+            junit 'report.xml'
+        }
+        failure {
+            echo '❌ Pipeline failed!'
+            junit 'report.xml'
+        }
+        always {
+            echo 'Pipeline finished.'
+        }
+    }
+}
 // pipeline {
 //     agent any
 
