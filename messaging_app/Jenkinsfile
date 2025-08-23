@@ -8,9 +8,13 @@ pipeline {
         }
         stage('Install Dependencies & Run Tests') {
             steps {
-                sh 'pip install --upgrade pip'
-                sh 'pip install -r messaging_app/requirements.txt'
-                sh 'pytest messaging_app --junitxml=report.xml'
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r messaging_app/requirements.txt
+                    pytest messaging_app --junitxml=report.xml
+                '''
             }
         }
     }
