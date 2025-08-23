@@ -1,5 +1,30 @@
 pipeline {
     agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git credentialsId: 'github-creds', url: 'https://github.com/enyasystem/alx-backend-python.git'
+            }
+        }
+        stage('Install dependencies') {
+            steps {
+                sh 'pip3 install -r requirements.txt'
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                sh 'pytest --junitxml=report.xml'
+            }
+        }
+    }
+    post {
+        always {
+            junit 'report.xml'
+        }
+    }
+}
+pipeline {
+    agent any
     environment {
         VENV = 'venv'
         DJANGO_SETTINGS_MODULE = 'messaging_app.settings'
