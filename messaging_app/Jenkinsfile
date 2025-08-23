@@ -4,31 +4,42 @@ pipeline {
             image 'python:3.10'
         }
     }
+    environment {
+        DJANGO_SETTINGS_MODULE = 'messaging_app.settings'
+    }
     stages {
         stage('Checkout') {
             steps {
                 git credentialsId: 'github-creds', url: 'https://github.com/enyasystem/alx-backend-python.git', branch: 'main'
             }
         }
-        stage('Install Dependencies & Run Tests') {
+        stage('Install dependencies') {
             steps {
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r messaging_app/requirements.txt'
-                sh 'pytest messaging_app --junitxml=report.xml'
+            }
+        }
+        stage('Migrate Database') {
+            steps {
+                sh 'python3 messaging_app/manage.py migrate'
+            }
+        }
+        stage('Run tests') {
+            steps {
+                sh 'pytest messaging_app --ds=messaging_app.settings --junitxml=report.xml'
             }
         }
     }
     post {
+        always {
+            echo 'Pipeline finished.'
+            junit 'report.xml'
+        }
         success {
             echo '✅ Pipeline succeeded!'
-            junit 'report.xml'
         }
         failure {
             echo '❌ Pipeline failed!'
-            junit 'report.xml'
-        }
-        always {
-            echo 'Pipeline finished.'
         }
     }
 }
