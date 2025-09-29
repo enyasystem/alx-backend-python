@@ -14,5 +14,5 @@ COPY . .
 # Expose the port Django runs on
 EXPOSE 8000
 
-# Run migrations and start the server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+# Run migrations and start the server with -p option
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver -p 8000 0.0.0.0:8000"]
