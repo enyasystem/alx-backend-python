@@ -20,16 +20,38 @@ def unread_inbox(request):
     user = request.user
     # Use the custom manager to fetch unread messages optimized with select_related() and only()
     qs = Message.unread.unread_for_user(user)
+    unread_count = Message.unread.unread_count_for_user(user)
+    
     data = [
         {
             'message_id': str(m.message_id),
             'sender': getattr(m.sender, 'username', None),
             'content': m.content,
             'sent_at': m.sent_at.isoformat(),
+            'parent_id': str(m.parent_message.message_id) if m.parent_message else None,
+            'has_replies': bool(m.replies.all()),  # prefetched, so no extra query
         }
         for m in qs
     ]
-    return JsonResponse({'unread': data})
+    return JsonResponse({
+        'unread': data,
+        'total_unread': unread_count
+    })
+
+@require_POST
+@login_required
+def mark_messages_read(request):
+    """Mark multiple messages as read."""
+    message_ids = request.POST.getlist('message_ids[]')
+    if not message_ids:
+        return JsonResponse({'error': 'No message IDs provided'}, status=400)
+        
+    updated_count = Message.unread.mark_as_read(message_ids, request.user)
+    
+    return JsonResponse({
+        'status': 'success',
+        'marked_as_read': updated_count
+    })
 
 
 User = get_user_model()

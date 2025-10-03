@@ -8,9 +8,37 @@ class UnreadMessagesManager(models.Manager):
         return (
             self.get_queryset()
             .filter(receiver=user, read=False)
-            .select_related('sender')
-            .only('message_id', 'sender__username', 'content', 'sent_at')
+            .select_related('sender', 'parent_message')
+            .prefetch_related('replies')
+            .only(
+                'message_id', 
+                'sender__username', 
+                'content', 
+                'sent_at',
+                'parent_message__message_id',
+                'read'
+            )
+            .order_by('-sent_at')
         )
+    
+    def mark_as_read(self, message_ids, user):
+        """Mark multiple messages as read for a user."""
+        return (
+            self.get_queryset()
+            .filter(
+                message_id__in=message_ids,
+                receiver=user,
+                read=False
+            )
+            .update(read=True)
+        )
+    
+    def unread_count_for_user(self, user):
+        """Get the count of unread messages for a user."""
+        return self.get_queryset().filter(
+            receiver=user,
+            read=False
+        ).count()
 
     # Backwards-compatible alias used in older tests/code
     def unread_for(self, user):
