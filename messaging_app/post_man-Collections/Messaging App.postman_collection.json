@@ -31,7 +31,22 @@
           ]
         }
       },
-      "response": []
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Token obtained', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var json = pm.response.json();",
+              "if (json.access) {",
+              "    pm.environment.set('access_token', json.access);",
+              "}"]
+          }
+        }
+      ]
     },
     {
       "name": "Refresh JWT Token",
@@ -92,7 +107,22 @@
           ]
         }
       },
-      "response": []
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Conversation created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "var json = pm.response.json();",
+              "if (json.conversation_id) {",
+              "    pm.environment.set('conversation_id', json.conversation_id);",
+              "}"]
+          }
+        }
+      ]
     },
     {
       "name": "Create Message",
@@ -126,7 +156,18 @@
           ]
         }
       },
-      "response": []
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Message created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});"]
+          }
+        }
+      ]
     },
     {
       "name": "List Conversations",
@@ -150,7 +191,18 @@
           ]
         }
       },
-      "response": []
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List conversations', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"]
+          }
+        }
+      ]
     },
     {
       "name": "List Messages",
@@ -176,7 +228,18 @@
           ]
         }
       },
-      "response": []
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List messages', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"]
+          }
+        }
+      ]
     },
     {
       "name": "Unauthorized access - List Conversations",
@@ -195,7 +258,18 @@
           ]
         }
       },
-      "response": []
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Unauthorized access', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+              "});"]
+          }
+        }
+      ]
     }
   ],
   "variable": [

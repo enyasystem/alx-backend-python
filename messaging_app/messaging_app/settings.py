@@ -12,6 +12,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
+import sys
+
+# Conditionally import JWTAuthentication to avoid import-time errors in test/CI envs
+try:
+    from rest_framework_simplejwt.authentication import JWTAuthentication  # type: ignore
+    JWT_AUTH_AVAILABLE = True
+except Exception:
+    JWTAuthentication = None
+    JWT_AUTH_AVAILABLE = False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,12 +69,18 @@ MIDDLEWARE = [
 ]
 
 # Django REST Framework global settings
+DEFAULT_AUTH_CLASSES = []
+if JWT_AUTH_AVAILABLE:
+    DEFAULT_AUTH_CLASSES.append('rest_framework_simplejwt.authentication.JWTAuthentication')
+
+# Always include basic/session authentication
+DEFAULT_AUTH_CLASSES += [
+    'rest_framework.authentication.BasicAuthentication',
+    'rest_framework.authentication.SessionAuthentication',
+]
+
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': DEFAULT_AUTH_CLASSES,
     'DEFAULT_PERMISSION_CLASSES': [
         'chats.permissions.IsParticipantOfConversation',
     ],

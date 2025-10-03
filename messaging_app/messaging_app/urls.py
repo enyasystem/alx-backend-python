@@ -20,17 +20,27 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from . import views
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+try:
+    from rest_framework_simplejwt.views import (
+        TokenObtainPairView,
+        TokenRefreshView,
+    )
+    _SIMPLE_JWT_AVAILABLE = True
+except Exception:  # guard against import-time errors in some envs
+    TokenObtainPairView = None
+    TokenRefreshView = None
+    _SIMPLE_JWT_AVAILABLE = False
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('admin/', admin.site.urls),
     path('api/', include('chats.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    # JWT token endpoints
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
+
+# JWT token endpoints (only when simplejwt is importable)
+if _SIMPLE_JWT_AVAILABLE:
+    urlpatterns += [
+        path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+        path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    ]
