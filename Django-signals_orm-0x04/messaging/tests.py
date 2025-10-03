@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .models import Message, Notification
+from .models import MessageHistory
 
 
 User = get_user_model()
@@ -20,3 +21,19 @@ class MessagingSignalsTest(TestCase):
         notif = nots.first()
         self.assertFalse(notif.read)
         self.assertEqual(notif.message, msg)
+
+    def test_message_history_on_edit(self):
+        msg = Message.objects.create(sender=self.u1, receiver=self.u2, content='First')
+        # Edit the message
+        msg.content = 'Edited'
+        msg.save()
+
+        # There should be a history entry
+        hist = MessageHistory.objects.filter(message=msg)
+        # Because we created the history using prev instance, history.message points to the same message
+        self.assertEqual(hist.count(), 1)
+        h = hist.first()
+        self.assertEqual(h.old_content, 'First')
+        # The message should be marked as edited
+        msg.refresh_from_db()
+        self.assertTrue(msg.edited)

@@ -11,6 +11,8 @@ class Message(models.Model):
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
     sent_at = models.DateTimeField(default=timezone.now)
+    # Indicates whether the message was edited after creation
+    edited = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-sent_at']
@@ -32,3 +34,19 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification {self.notification_id} for {self.user} (message={self.message_id})"
+
+
+class MessageHistory(models.Model):
+    """Stores previous versions of a Message's content."""
+    history_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    message = models.ForeignKey(Message, related_name='history', on_delete=models.CASCADE)
+    old_content = models.TextField()
+    edited_at = models.DateTimeField(auto_now_add=True)
+    # Optional pointer to the user who made the edit; may be null if unknown
+    editor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ['-edited_at']
+
+    def __str__(self):
+        return f"History {self.history_id} for message {self.message.message_id} at {self.edited_at}"

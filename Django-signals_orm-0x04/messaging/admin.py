@@ -13,3 +13,11 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ('notification_id', 'user', 'message', 'created_at', 'read')
     list_filter = ('read',)
     search_fields = ('user__username',)
+
+from .models import MessageHistory
+
+
+@admin.register(MessageHistory)
+class MessageHistoryAdmin(admin.ModelAdmin):
+    list_display = ('history_id', 'message', 'edited_at', 'editor')
+    readonly_fields = ('old_content', 'edited_at')

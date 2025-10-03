@@ -10,3 +10,25 @@ def create_notification_on_message(sender, instance, created, **kwargs):
         return
 
     Notification.objects.create(user=instance.receiver, message=instance)
+
+
+from django.db.models.signals import pre_save
+
+
+@receiver(pre_save, sender=Message)
+def record_message_history(sender, instance, **kwargs):
+    """Before a Message is updated, save the old content into MessageHistory."""
+    # If instance is new (no PK), nothing to record
+    if not instance.pk:
+        return
+
+    try:
+        prev = Message.objects.get(pk=instance.pk)
+    except Message.DoesNotExist:
+        return
+
+    # If content changed, create history record and set edited flag
+    if prev.content != instance.content:
+        from .models import MessageHistory
+        MessageHistory.objects.create(message=prev, old_content=prev.content, editor=None)
+        instance.edited = True
