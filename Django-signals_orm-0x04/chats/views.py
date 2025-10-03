@@ -4,6 +4,7 @@ from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
+from django.db import models
 
 from messaging.models import Message
 
