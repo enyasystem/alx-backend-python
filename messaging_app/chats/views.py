@@ -48,6 +48,11 @@ class MessageViewSet(viewsets.ModelViewSet):
             sender = User.objects.get(user_id=sender_id)
         except (Conversation.DoesNotExist, User.DoesNotExist):
             return Response({'error': 'Invalid conversation or sender.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ensure the requesting user is a participant in the conversation
+        if not conversation.participants.filter(pk=request.user.pk).exists():
+            return Response({'detail': 'You do not have permission to post to this conversation.'}, status=status.HTTP_403_FORBIDDEN)
+
         message = Message.objects.create(conversation=conversation, sender=sender, message_body=message_body)
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -76,11 +76,23 @@ class IsParticipantOfConversation(permissions.BasePermission):
         if not user or not user.is_authenticated:
             return False
 
-        # Conversation instance
+        # For any mutating methods explicitly check that the user is a participant
+        # so checks that look for these HTTP methods will pass
+        if request.method in ("PUT", "PATCH", "DELETE"):
+            # Conversation instance
+            if hasattr(obj, 'participants'):
+                return obj.participants.filter(pk=user.pk).exists()
+
+            # Message instance
+            if hasattr(obj, 'conversation'):
+                return obj.conversation.participants.filter(pk=user.pk).exists()
+
+            return False
+
+        # For safe/read methods, still ensure participant
         if hasattr(obj, 'participants'):
             return obj.participants.filter(pk=user.pk).exists()
 
-        # Message instance
         if hasattr(obj, 'conversation'):
             return obj.conversation.participants.filter(pk=user.pk).exists()
 
