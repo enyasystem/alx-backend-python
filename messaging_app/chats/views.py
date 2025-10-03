@@ -3,14 +3,21 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework import filters
+from rest_framework.permissions import IsAuthenticated
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
+from .permissions import IsParticipant, IsSenderOrParticipant
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['participants__username']
+    permission_classes = [IsAuthenticated, IsParticipant]
+
+    def get_queryset(self):
+        # Return only conversations where the requesting user is a participant
+        user = self.request.user
+        return Conversation.objects.filter(participants__pk=user.pk).distinct()
 
     def create(self, request, *args, **kwargs):
         participants_ids = request.data.get('participants', [])
@@ -22,10 +29,15 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['conversation__conversation_id', 'sender__username']
+    permission_classes = [IsAuthenticated, IsParticipant, IsSenderOrParticipant]
+
+    def get_queryset(self):
+        # Messages from conversations where the user participates
+        user = self.request.user
+        return Message.objects.filter(conversation__participants__pk=user.pk).distinct()
 
     def create(self, request, *args, **kwargs):
         conversation_id = request.data.get('conversation')
