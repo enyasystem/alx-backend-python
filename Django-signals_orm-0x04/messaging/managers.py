@@ -67,3 +67,52 @@ class UnreadMessagesManager(models.Manager):
             return node
 
         return build_node(root)
+
+    def thread_for_message_recursive(self, message_id):
+        """Build thread using iterative ORM filters (recursive via repeated queries).
+
+        This method demonstrates a recursive fetch using Django ORM: it finds the
+        root message and then repeatedly queries for children whose parent is in
+        the current set until no more descendants are found.
+        """
+        qs = (
+            self.get_queryset()
+            .select_related('sender')
+            .only('message_id', 'content', 'sent_at', 'sender__username', 'parent_message')
+        )
+
+        root = qs.get(message_id=message_id)
+
+        all_nodes = {root.message_id: root}
+        # start with root pk list
+        current_ids = [root.pk]
+        while current_ids:
+            children_qs = qs.filter(parent_message__pk__in=current_ids)
+            children = list(children_qs)
+            if not children:
+                break
+            for c in children:
+                all_nodes[c.message_id] = c
+            current_ids = [c.pk for c in children]
+
+        # Build parent->children map
+        children_map = {}
+        for node in all_nodes.values():
+            pid = getattr(node.parent_message, 'message_id', None)
+            children_map.setdefault(pid, []).append(node)
+
+        def build_node(msg):
+            node = {
+                'message_id': str(msg.message_id),
+                'sender': getattr(msg.sender, 'username', None),
+                'content': msg.content,
+                'sent_at': msg.sent_at.isoformat(),
+                'replies': [],
+            }
+            for child in children_map.get(msg.message_id, []):
+                if child.message_id == msg.message_id:
+                    continue
+                node['replies'].append(build_node(child))
+            return node
+
+        return build_node(root)
