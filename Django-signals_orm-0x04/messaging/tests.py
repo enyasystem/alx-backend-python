@@ -26,6 +26,8 @@ class MessagingSignalsTest(TestCase):
         msg = Message.objects.create(sender=self.u1, receiver=self.u2, content='First')
         # Edit the message
         msg.content = 'Edited'
+        # simulate view attaching the editor
+        msg._editor = self.u1
         msg.save()
 
         # There should be a history entry
@@ -37,3 +39,7 @@ class MessagingSignalsTest(TestCase):
         # The message should be marked as edited
         msg.refresh_from_db()
         self.assertTrue(msg.edited)
+        # the edited_by field should point to the editor
+        self.assertEqual(msg.edited_by, self.u1)
+        # history editor recorded
+        self.assertEqual(h.editor, self.u1)

@@ -4,7 +4,7 @@ from .models import Message, Notification
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('message_id', 'sender', 'receiver', 'sent_at')
+    list_display = ('message_id', 'sender', 'receiver', 'sent_at', 'edited', 'edited_by')
     search_fields = ('sender__username', 'receiver__username', 'content')
 
 

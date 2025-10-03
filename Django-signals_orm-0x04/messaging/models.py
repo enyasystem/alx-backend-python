@@ -13,6 +13,14 @@ class Message(models.Model):
     sent_at = models.DateTimeField(default=timezone.now)
     # Indicates whether the message was edited after creation
     edited = models.BooleanField(default=False)
+    # Who last edited the message (optional)
+    edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='edited_messages',
+    )
 
     class Meta:
         ordering = ['-sent_at']

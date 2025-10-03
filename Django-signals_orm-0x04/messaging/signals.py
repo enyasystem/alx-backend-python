@@ -30,5 +30,9 @@ def record_message_history(sender, instance, **kwargs):
     # If content changed, create history record and set edited flag
     if prev.content != instance.content:
         from .models import MessageHistory
-        MessageHistory.objects.create(message=prev, old_content=prev.content, editor=None)
+        # Check for an attached editor on the instance (set by view or save caller)
+        editor = getattr(instance, '_editor', None)
+        MessageHistory.objects.create(message=prev, old_content=prev.content, editor=editor)
         instance.edited = True
+        if editor:
+            instance.edited_by = editor
