@@ -25,6 +25,18 @@ class Message(models.Model):
     class Meta:
         ordering = ['-sent_at']
 
+    # Read flag for the message
+    read = models.BooleanField(default=False)
+
+    objects = models.Manager()
+
+    class UnreadMessagesManager(models.Manager):
+        def unread_for(self, user):
+            # Only select necessary fields for an inbox listing
+            return self.get_queryset().filter(receiver=user, read=False).only('message_id', 'sender', 'content', 'sent_at')
+
+    unread = UnreadMessagesManager()
+
     def __str__(self):
         return f"Message {self.message_id} from {self.sender} to {self.receiver}"
 
