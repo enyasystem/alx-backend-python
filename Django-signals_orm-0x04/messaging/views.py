@@ -54,24 +54,33 @@ def threaded_message(request, message_id):
     in-memory to avoid N+1 queries.
     """
     # Perform an optimized fetch here (select_related + prefetch_related)
+    # Fetch the root message
     root = (
         Message.objects
         .select_related('sender')
-        .prefetch_related('replies__sender', 'replies__replies__sender', 'replies__replies__replies__sender')
+        .prefetch_related('replies__sender')
         .only('message_id', 'content', 'sent_at', 'sender__username', 'parent_message')
         .get(message_id=message_id)
     )
 
-    # Walk prefetched replies to build the threaded structure without extra queries
+    # Recursive ORM approach: repeatedly query children where parent in current_ids
     all_nodes = {root.message_id: root}
+    current_ids = [root.pk]
+    while current_ids:
+        children_qs = (
+            Message.objects
+            .select_related('sender')
+            .filter(parent_message__pk__in=current_ids)
+            .only('message_id', 'content', 'sent_at', 'sender__username', 'parent_message')
+        )
+        children = list(children_qs)
+        if not children:
+            break
+        for c in children:
+            all_nodes[c.message_id] = c
+        current_ids = [c.pk for c in children]
 
-    def walk(node):
-        for child in getattr(node, 'replies').all():
-            all_nodes[child.message_id] = child
-            walk(child)
-
-    walk(root)
-
+    # Build parent->children map
     children_map = {}
     for node in all_nodes.values():
         pid = getattr(node.parent_message, 'message_id', None)
