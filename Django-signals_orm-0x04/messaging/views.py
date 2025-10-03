@@ -3,13 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
-
-
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET
+from django.views.decorators.cache import cache_page
 
 from .models import Message
 
@@ -96,6 +90,7 @@ def send_message(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@cache_page(60)  # Cache for 60 seconds
 @require_GET
 @login_required
 def list_messages(request):
@@ -121,6 +116,7 @@ def list_messages(request):
     
     return JsonResponse({'messages': data})
 
+@cache_page(60)  # Cache for 60 seconds
 @require_GET
 @login_required
 def threaded_message(request, message_id):
