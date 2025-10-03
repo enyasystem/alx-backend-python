@@ -6,13 +6,13 @@ from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
-from .permissions import IsParticipant, IsSenderOrParticipant
+from .permissions import IsParticipantOfConversation
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['participants__username']
-    permission_classes = [IsAuthenticated, IsParticipant]
+    permission_classes = [IsParticipantOfConversation]
 
     def get_queryset(self):
         # Return only conversations where the requesting user is a participant
@@ -32,7 +32,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['conversation__conversation_id', 'sender__username']
-    permission_classes = [IsAuthenticated, IsParticipant, IsSenderOrParticipant]
+    permission_classes = [IsParticipantOfConversation]
 
     def get_queryset(self):
         # Messages from conversations where the user participates
