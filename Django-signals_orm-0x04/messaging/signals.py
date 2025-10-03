@@ -36,3 +36,23 @@ def record_message_history(sender, instance, **kwargs):
         instance.edited = True
         if editor:
             instance.edited_by = editor
+
+
+    # Cleanup related data when a user is deleted
+    from django.db.models.signals import post_delete
+    from django.contrib.auth import get_user_model
+    from django.db import models as dj_models
+
+
+    @receiver(post_delete, sender=get_user_model())
+    def cleanup_user_related(sender, instance, **kwargs):
+        """Ensure messages, notifications and histories related to the deleted user are removed."""
+        from .models import MessageHistory
+        # Delete MessageHistory entries where editor was the user
+        MessageHistory.objects.filter(editor=instance).delete()
+
+        # Delete Notifications for the user
+        Notification.objects.filter(user=instance).delete()
+
+        # Delete any messages where the user was sender or receiver
+        Message.objects.filter(dj_models.Q(sender=instance) | dj_models.Q(receiver=instance)).delete()
