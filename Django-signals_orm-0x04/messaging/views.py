@@ -44,6 +44,61 @@ def delete_user(request):
     return JsonResponse({'status': 'deleted'})
 
 
+@require_POST
+@login_required
+def send_message(request):
+    """Send a new message to a specific user."""
+    receiver_id = request.POST.get('receiver_id')
+    content = request.POST.get('content')
+    parent_id = request.POST.get('parent_id')  # Optional, for replies
+    
+    try:
+        receiver = User.objects.get(pk=receiver_id)
+        parent = Message.objects.get(pk=parent_id) if parent_id else None
+        
+        message = Message.objects.create(
+            sender=request.user,
+            receiver=receiver,
+            content=content,
+            parent_message=parent
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'message_id': str(message.message_id)
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Receiver not found'}, status=404)
+    except Message.DoesNotExist:
+        return JsonResponse({'error': 'Parent message not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@require_GET
+@login_required
+def list_messages(request):
+    """List messages for the current user with optimized querying."""
+    messages = (
+        Message.objects.filter(receiver=request.user)
+        .select_related('sender', 'parent_message')
+        .prefetch_related('replies')
+        .order_by('-sent_at')
+    )
+    
+    data = [
+        {
+            'message_id': str(msg.message_id),
+            'sender': msg.sender.username,
+            'content': msg.content,
+            'sent_at': msg.sent_at.isoformat(),
+            'has_replies': msg.replies.exists(),
+            'parent_id': str(msg.parent_message.message_id) if msg.parent_message else None
+        }
+        for msg in messages
+    ]
+    
+    return JsonResponse({'messages': data})
+
 @require_GET
 @login_required
 def threaded_message(request, message_id):
