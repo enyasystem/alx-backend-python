@@ -42,3 +42,17 @@ def delete_user(request):
     # delete user will trigger post_delete signal
     user.delete()
     return JsonResponse({'status': 'deleted'})
+
+
+@require_GET
+@login_required
+def threaded_message(request, message_id):
+    """Return a message and its replies in a threaded nested structure.
+
+    This view optimizes DB access by selecting related sender and prefetching
+    all replies for the subtree in a single query, then builds the thread
+    in-memory to avoid N+1 queries.
+    """
+    # Delegate thread assembly to the manager to keep view logic thin
+    thread = Message.unread.thread_for_message(message_id)
+    return JsonResponse({'thread': thread})

@@ -24,6 +24,15 @@ class Message(models.Model):
         related_name='edited_messages',
     )
 
+    # Self-referential FK to support replies/threading
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        related_name='replies',
+        on_delete=models.CASCADE,
+    )
+
     class Meta:
         ordering = ['-sent_at']
 
