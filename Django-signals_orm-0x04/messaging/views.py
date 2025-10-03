@@ -5,12 +5,21 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
 
 
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
+
+from .models import Message
+
+
 @require_GET
 @login_required
 def unread_inbox(request):
     user = request.user
-    # Use the custom manager to fetch unread messages optimized with only()
-    qs = request.user.received_messages.model.unread.unread_for(user)
+    # Use the custom manager to fetch unread messages optimized with select_related() and only()
+    qs = Message.unread.unread_for_user(user)
     data = [
         {
             'message_id': str(m.message_id),

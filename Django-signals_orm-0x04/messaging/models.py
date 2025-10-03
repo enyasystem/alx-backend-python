@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 import uuid
 
+from .managers import UnreadMessagesManager
+
 
 class Message(models.Model):
     """Simple Message model: sender -> receiver with body and timestamp."""
@@ -29,12 +31,6 @@ class Message(models.Model):
     read = models.BooleanField(default=False)
 
     objects = models.Manager()
-
-    class UnreadMessagesManager(models.Manager):
-        def unread_for(self, user):
-            # Only select necessary fields for an inbox listing
-            return self.get_queryset().filter(receiver=user, read=False).only('message_id', 'sender', 'content', 'sent_at')
-
     unread = UnreadMessagesManager()
 
     def __str__(self):
